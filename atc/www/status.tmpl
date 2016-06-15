@@ -1,0 +1,149 @@
+{{define "locations"}}
+<div id="layout">
+    <a href="#menu" id="menuLink" class="menu-link"></a>
+    <div id="menu">
+        <div class="pure-menu">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item pure-menu-selected"><a href="/status" class="pure-menu-link">STATUS</a></li>
+                <li class="pure-menu-item "><a href="/map" class="pure-menu-link">MAP</a></li>
+            </ul>
+        </div>
+    </div>
+    <div id="main">
+        <table class="pure-table pure-table-horizontal status-table">
+        <style scoped>
+        .Connected {
+            background: rgb(28, 184, 65);
+            padding: 3px;
+            font-size: 70%;
+            color: white;
+            border-radius: 2px;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+        }
+
+        .Error {
+            background: rgb(202, 60, 60);
+            padding: 3px;
+            font-size: 70%;
+            color: white;
+            border-radius: 2px;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+        }
+
+        .Timeout {
+            background: rgb(223, 117, 20);
+            padding: 3px;
+            font-size: 70%;
+            color: white;
+            border-radius: 2px;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+        }
+        #progressbar {
+            background-color: lightgrey;
+            width: 80px;
+            border-radius: 6px;
+            padding: 0px;
+        }
+        #progressbar > div {
+            color: white;
+            font-size: 70%;
+            text-align: center;
+            vertical-align:text-bottom;
+            background-color: rgb(28, 184, 65);
+            width: 0%;
+            height: 15px;
+            border-radius: 5px;
+        }
+        </style>
+            <thead>
+                <tr>
+                    <th>M.O.R.F.</th>
+                    <th>Fuel</th>
+                    <th>Battery</th>
+                </tr>
+            </thead>
+            <tbody>{{range .}}
+                <tr id="{{.Name}}-table">
+                    <td><a id="{{.Name}}-status" class="Error pure-button-small"> {{.Name}} </a></td>
+                    <td>
+                        <div id="progressbar">
+                            <div id="{{.Name}}-fuel">{{.Fuel}}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div id="progressbar">
+                            <div id="{{.Name}}-batt">{{.Battery}}</div>
+                        </div>
+                    </td>
+                </tr>{{end}}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+
+function generateInterval (k) {
+    return Math.min(30, (Math.pow(2, k) - 1)) * 1000; 
+}
+
+var attempts = 1;
+var idvalue = 0;
+
+var loc = window.location, websocket_uri;
+
+if (loc.protocol === "https:") {
+    websocket_uri = "wss:";
+} else {
+    websocket_uri = "ws:";
+}
+websocket_uri += "//" + loc.host + "/ws";
+console.log("Websocket URI: " + websocket_uri)
+
+function createWebSocket () {
+    ws = new WebSocket(websocket_uri);
+    
+    ws.onopen = function () {
+        console.log("Websockets Open");
+        var Sub = {
+            id:0,
+            msgCmd:"Subscribe",
+            dataType:"",
+            msgData:""
+        }
+        ws.send(JSON.stringify(Sub))
+        attempts = 1;
+        // location.reload();
+    }
+
+    ws.onmessage = function(e) {
+        m =  JSON.parse(e.data)  
+        if (m.msgCmd == "update"){
+            d = JSON.parse(m.msgData)
+            console.log(d)
+            element = d.name
+            document.getElementById(element+"-fuel").style.width = d.fuel +'%'
+            document.getElementById(element+"-fuel").innerHTML = d.fuel + " %"
+            document.getElementById(element+"-batt").style.width = d.batt +'%'
+            document.getElementById(element+"-batt").innerHTML = d.batt + " %"
+            document.getElementById(element+"-status").className = d.status + " pure-button-small"
+            
+        } 
+    }
+
+    ws.onclose = function () {
+        console.log("DISCONNECTED");
+        
+        var time = generateInterval(attempts);
+
+        setTimeout(function () {
+            attempts++;
+            createWebSocket(); 
+        }, time);
+    }
+}
+createWebSocket();
+
+</script>
+<script src="ui.js"></script>
+{{end}}
+

@@ -1,0 +1,447 @@
+<html lang="en" ng-app="tokens">
+<head>
+	<title>OOYA ATC</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- <meta property="og:description" content="Map" /> -->
+	<script src="styles.js"></script>
+	<script src="/js/angular.min.js"></script>
+	<link rel="stylesheet" href="/pure-min.css">
+	<link rel="stylesheet" href="/side-menu.css">
+	<link rel="stylesheet" href="/font-awesome-4.6.3/css/font-awesome.css">
+	<link rel="stylesheet" href="/css/grids-responsive-min.css">
+	
+	<style>
+		.status-table {
+		  padding: 0px;
+		  margin: 0px;
+		  width: 100%;
+		}
+		progress[value] {
+		  -webkit-appearance: none;
+		  appearance: none;
+		  width: 50px;
+		  height: 20px;
+		  color: #0063a6;
+		}
+		progress[value]::-webkit-progress-bar {
+		  background-color: #eee;
+		}
+		.button-success,
+		.button-error,
+		.button-warning,
+		.button-secondary {
+			color: white;
+			border-radius: 4px;
+			text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+		}
+
+		.button-success {
+			background: rgb(28, 184, 65); /* this is a green */
+		}
+
+		.button-error {
+			background: rgb(202, 60, 60); /* this is a maroon */
+		}
+
+		.button-warning {
+			background: rgb(223, 117, 20); /* this is an orange */
+		}
+
+		.button-secondary {
+			background: rgb(66, 184, 221); /* this is a light blue */
+		}
+		.rcorners1 {
+			text-align: center;
+			margin: 10px 15px 10px 8px;
+			border: 10px solid #EDEDED;
+			border-radius: 10px;
+			background: #F6F6F6;
+			padding: 10px; 
+			width: 220px;
+			/*height: 150px; */
+		}
+		.valid {
+			background: #D5F0DB;
+		}
+		.revoked {
+			background: #EDCACA;
+		}
+		.master {
+			border: 10px solid #709324;
+		}
+	   
+		.color-primary-0 { color: #ACFFEA } /* Main Primary color */
+		.color-primary-1 { color: #D4FFF4 }
+		.color-primary-2 { color: #BFFFEF }
+		.color-primary-3 { color: #9BFFE6 }
+		.color-primary-4 { color: #8CFDE1 }
+		
+		.color-secondary-1-0 { color: #F6F6F6 } /* Main Secondary color (1) */
+		.color-secondary-1-1 { color: #EDEDED }
+		.color-secondary-1-2 { color: #F2F2F2 }
+		.color-secondary-1-3 { color: #F4F4F4 }
+		.color-secondary-1-4 { color: #F2F2F2 }
+		
+		.color-secondary-2-0 { color: #615BA5 } /* Main Secondary color (2) */
+		.color-secondary-2-1 { color: #625CB5 }
+		.color-secondary-2-2 { color: #615BAC }
+		.color-secondary-2-3 { color: #64609F }
+		.color-secondary-2-4 { color: #5A568D }
+		
+		.color-complement-0 { color: #D88D61 }  /* Main Complement color */
+		.color-complement-1 { color: #FF9556 }
+		.color-complement-2 { color: #FF9B60 }
+		.color-complement-3 { color: #94674C }
+		.color-complement-4 { color: #3F3129 }
+
+		.myClass {
+			visibility: hidden
+		}
+		.center {
+			margin: auto;
+			width: 100%;
+			/*border: 3px solid #73AD21;*/
+			padding: 10px;
+		}
+
+	</style>
+</head>
+<body ng-controller="MainCtl">
+
+<div id="layout">
+	<a href="#menu" id="menuLink" class="menu-link"></a>
+	<div id="menu">
+		<div class="pure-menu">
+			<a class="pure-menu-heading" href="#">Selected: {{io.carouselposition}}</a>
+				<ul ng-repeat="log in logmessages | reverse" class="pure-menu-list">
+					<li  class="pure-menu-item"><a href="/" class="pure-menu-link">{{log.msg}}</a></li>
+				</ul>
+		</div>
+	</div>
+
+	<div id="main" class="color-secondary-1-2">
+
+
+<!-- 	  <br>
+	  <action cmd="hello" func="ManSend" title="Hello"></action>
+	  <action cmd="kill" func="ManSend" title="killer"> Kill</action>
+	  <br> -->
+
+		<div class="header">
+			<!-- <h2>{{io.state}}</h2> -->
+		</div>
+		<div class="content">
+			<h2 class="content-subhead">Manual Controls</h2>
+			<div div class="pure-g"> 
+				<div ng-repeat="control in Controls">
+				<action cmd={{control.cmd}} func="ManSend" icon={{control.icon}} title={{control.title}} isdisabled={{control.isdisabled}} ></action>
+				</div>               
+			</div>
+			<h2 class="content-subhead">Inputs</h2>
+			<div div class="pure-g">
+				<div id="inputs">
+	
+					<ul>
+					<div ng-repeat="(key, value) in io.inputs" class="pure-u-1-3"> 
+					 <button ng-class="{'button-success pure-button': value, 'button-error pure-button': !value,    'button-warning pure-button': value>1}" >{{key}} </button>
+		
+					</div>
+					</ul>
+				</div>
+			</div>
+			<h2 class="content-subhead">Outputs</h2>
+			<div div class="pure-g">                
+				<div id="outputs">
+					<ul>
+					<div ng-repeat="(key, value) in io.outputs" class="pure-u-1-3"> 
+					 <button ng-class="{'button-success pure-button': value, 'button-error pure-button': !value,    'button-warning pure-button': value>1}" >{{key}} </button>
+		
+					</div>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+<script>
+	function generateInterval (k) {
+		return Math.min(30, (Math.pow(2, k) - 1)) * 1000; 
+	}
+
+	var app = angular.module("tokens", []);
+
+	app.directive('action', function ($interval) {
+		return {
+			templateUrl: 'action.html',
+			// restrict: 'E',
+			scope: {
+				func: '=',
+				cmd: '@',
+				title: '@',
+				icon: '@',
+				isdisabled: '@',
+			},
+			link: function (scope, element, attrs) {
+				element.addClass('action');
+
+				var promise;
+   
+				// scope.mouseDown = function(fn) {
+				// 	promise = $interval(function () {
+				// 		// console.log(scope.isdisabled) 
+				// 		// console.log(scope.title) 
+				// 		// console.log(scope.func)
+				// 		// console.log(scope.icon) 
+				// 		// console.log(scope.cmd) 
+				// 		scope.func(scope.cmd);
+				// 		// console.log(scope.title) 
+				// 	}, 50);
+				// };
+
+				scope.mouseDown = function(fn) {
+					// promise = function () {
+						// console.log(scope.isdisabled) 
+						// console.log(scope.title) 
+						// console.log(scope.func)
+						// console.log(scope.icon) 
+						// console.log(scope.cmd) 
+						scope.func(scope.cmd);
+						// console.log(scope.title) 
+					
+				};
+
+				scope.mouseUp = function () {
+					
+				};
+			}
+		};
+	});
+
+	app.filter('reverse', function() {
+		return function(items) {
+			return items.slice().reverse();
+		};
+	});
+
+	app.controller("MainCtl", function($scope) {
+  		$scope.value = 1;
+
+
+
+
+		$scope.Time = 150;
+		$scope.altTime = 125;
+		$scope.io;
+		$scope.statusz;
+		var attempts = 1;
+
+		var loc = window.location, websocket_uri;
+		if (loc.protocol === "https:") {
+			websocket_uri = "wss:";
+		} else {
+			websocket_uri = "ws:";
+		}
+
+		function createWebSocketIO () {
+			url = websocket_uri + "//" + loc.host +"/ws/io";
+			console.log(url)
+			ioconn = new WebSocket(url);
+			
+			ioconn.onopen = function () {
+				console.log("Websockets Open");
+			}
+		
+			ioconn.onmessage = function(e) {
+				m =  JSON.parse(e.data)
+				console.log("NewIOMessage")
+				// $scope.messages;
+				$scope.$apply(function(){
+					$scope.io = m
+					$scope.statusz = m.statusz
+				});
+			}
+		
+			ioconn.onclose = function () {
+				console.log("DISCONNECTED");
+				
+				var time = generateInterval(attempts);
+		
+				setTimeout(function () {
+					attempts++;
+					createWebSocketIO(); 
+				}, time);
+			}
+		}
+	 
+		createWebSocketIO();
+
+		function createWebSocketMan () {
+			url = websocket_uri + "//" + loc.host +"/ws/man";
+			console.log(url)
+			manconn = new WebSocket(url);
+			
+			manconn.onopen = function () {
+				console.log("Websockets Open");
+			}
+		
+			manconn.onmessage = function(e) {
+				m =  JSON.parse(e.data)
+				console.log("NewManMessage")
+				$scope.$apply(function(){
+					$scope.Controls = m.control;
+				});
+				
+				// $scope.messages;
+				// $scope.$apply(function(){
+				//     $scope.messages = m
+				//     $scope.statusz = m.statusz
+				// });
+			}
+		
+			manconn.onclose = function () {
+				console.log("DISCONNECTED");
+				
+				var time = generateInterval(attempts);
+		
+				setTimeout(function () {
+					attempts++;
+					createWebSocketMan(); 
+				}, time);
+			}
+			$scope.ManSend = function(cmd) {
+				console.log("Send Command")
+				manconn.send(cmd);
+			}
+
+		}
+		$scope.sometherfunc = function() {
+			console.log("otherfunc")
+		}
+
+		createWebSocketMan();
+
+		$scope.logmessages= [];
+
+		function createWebSocketLog () {
+			url = websocket_uri + "//" + loc.host +"/ws/log";
+			console.log(url)
+			logconn = new WebSocket(url);
+			
+			logconn.onopen = function () {
+				console.log("Websockets Open");
+			}
+		
+			logconn.onmessage = function(e) {
+				m =  JSON.parse(e.data)
+				console.log(m)
+				$scope.$apply(function(){
+				    $scope.logmessages.push(m)
+				    // $scope.statusz = m.statusz
+				});
+
+				// console.log("NewManMessage")
+				// $scope.Controls = m.control;
+				// $scope.messages;
+				// $scope.$apply(function(){
+				//     $scope.messages = m
+				//     $scope.statusz = m.statusz
+				// });
+			}
+		
+			logconn.onclose = function () {
+				console.log("DISCONNECTED");
+				
+				var time = generateInterval(attempts);
+		
+				setTimeout(function () {
+					attempts++;
+					createWebSocketLog(); 
+				}, time);
+			}
+			$scope.LogSend = function(cmd) {
+				console.log("Send Command")
+				logconn.send(cmd);
+			}
+
+		}
+		$scope.sometherfunc = function() {
+			console.log("otherfunc")
+		}
+
+		createWebSocketLog();
+
+		// $scope.Controls = [
+		// {
+		// 	title: "Manual",
+		// 	cmd: "Manual",
+		// 	icon: "fa fa-hand-paper-o",
+		// 	isdisabled: true,
+		// 	isClickable: true,
+		// },{
+		// 	title: "Safe",
+		// 	cmd: "Safe",
+		// 	icon: "fa fa-refresh",
+		// 	isdisabled: false,
+		// 	isClickable: true,
+		// },{
+		// 	title: "Unclamp",
+		// 	cmd: "Unclamp",
+		// 	icon: "fa fa-unlock",
+		// 	isdisabled: false,
+		// 	isClickable: true,
+		// },{
+		// 	title: "Up",
+		// 	cmd: "Up",
+		// 	icon: "fa fa-arrow-up",
+		// 	isdisabled: false,
+		// 	isClickable: true,
+		// },{
+		// 	title: "Down",
+		// 	cmd: "Down",
+		// 	icon: "fa fa-arrow-down",
+		// 	isdisabled: false,
+		// 	isClickable: true,
+		// },{
+		// 	title: "Advance",
+		// 	cmd: "Advance",
+		// 	icon: "fa fa-arrow-right",
+		// 	isdisabled: false,
+		// 	isClickable: true,
+		// },{
+		// 	title: "Retract",
+		// 	cmd: "Retract",
+		// 	icon: "fa fa-arrow-left",
+		// 	isdisabled: false,
+		// 	isClickable: true,
+		// },{
+		// 	title: "Orient Pin Retrat",
+		// 	cmd: "OrientPinRetrat",
+		// 	icon: "fa fa-level-up",
+		// 	isdisabled: false,
+		// 	isClickable: true,
+		// },{
+		// 	title: "Index Fwd",
+		// 	cmd: "IndexForward",
+		// 	icon: "fa fa-repeat",
+		// 	isdisabled: false,
+		// 	isClickable: true,
+		// },{
+		// 	title: "Index Reverse",
+		// 	cmd: "IndexReverse",
+		// 	icon: "fa fa-undo",
+		// 	isdisabled: true,
+		// 	isClickable: true,
+		// }
+		// ]
+
+		
+
+
+	});
+
+</script>
+<script src="ui.js"></script>
+
+

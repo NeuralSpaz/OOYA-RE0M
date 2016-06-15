@@ -1,0 +1,62 @@
+<html lang="en" ng-app="YOUR_APP">
+<head>
+    <title>OOYA ATC</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/js/angular.min.js"></script>
+    <script src="/angular-websocket.js"></script>
+
+<section ng-controller="ioController">
+    <ul>
+      <li ng-repeat="(key, value) in io">
+        {{ key }} {{value}}
+      </li>
+      <li ng-repeat="(key, value) in io.inputs">
+        {{ key }} {{value}}
+      </li>
+      <li ng-repeat="data in io.inputs">
+        {{data}}
+      </li>
+    </ul>
+</section>
+  <script>
+    angular.module('YOUR_APP', [
+      'ngWebSocket' // you may also use 'angular-websocket' if you prefer
+    ])
+    //                          WebSocket works as well
+    .factory('io', function($websocket) {
+      // Open a WebSocket connection
+      var ioStream = $websocket('ws://192.168.1.130:1234/ws/io');
+
+      var inputs;
+      var outputs;
+
+
+      ioStream.onMessage(function(message) {
+        m = JSON.parse(message.data);
+        inputs = m.inputs;
+        outputs = m.outputs;
+        // collection.push(JSON.parse(message.data).statusz);
+        // collection = (JSON.parse(message.data)).inputs
+        // console.log(inputs)
+      });
+
+      var methods = {
+        inputs: inputs,
+        ouputs: outputs,
+        get: function() {
+          ioStream.send(JSON.stringify({ action: 'get' }));
+        }
+      };
+
+      return methods;
+    })
+    .controller('ioController', function($scope, io) {
+        // $rootScope.$apply(function(){
+            $scope.io = io
+        // });
+            
+    });
+  </script>
+
+
