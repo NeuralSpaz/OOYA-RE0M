@@ -8,7 +8,7 @@ import (
 )
 
 type controls struct {
-	Control [16]control `json:"control"`
+	Control [17]control `json:"control"`
 }
 
 type control struct {
@@ -20,7 +20,7 @@ type control struct {
 }
 
 var atcControls controls = controls{
-	[16]control{control{
+	[17]control{control{
 		Title:       "Manual",
 		Cmd:         "Manual",
 		Icon:        "fa fa-hand-paper-o",
@@ -116,6 +116,12 @@ var atcControls controls = controls{
 		Icon:        "fa fa-link",
 		Isdisabled:  true,
 		Isclickable: true,
+	}, control{
+		Title:       "Z Axis Clamp",
+		Cmd:         "ZClamp",
+		Icon:        "fa fa-link",
+		Isdisabled:  true,
+		Isclickable: true,
 	},
 	},
 }
@@ -128,7 +134,7 @@ var ManLoopCount int
 func Manual(d *device) stateFn {
 	fmt.Println("Manual")
 
-	io, err := d.readIO()
+	_, err := d.readIO()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -139,58 +145,59 @@ func Manual(d *device) stateFn {
 	}
 	atcControls.Control[1].Isdisabled = true
 	atcControls.Control[0].Isdisabled = false
+	// 	atcControls.Control[12].Isdisabled = true
+	// 	atcControls.Control[13].Isdisabled = true
+	// if !UnClampedLS.isOn(io) {
+	// 	atcControls.Control[2].Isdisabled = false
+	// } else {
+	// 	atcControls.Control[2].Isdisabled = true
+	// }
 
-	if !UnClampedLS.isOn(io) {
-		atcControls.Control[2].Isdisabled = false
-	} else {
-		atcControls.Control[2].Isdisabled = true
-	}
+	// if UnClampedLS.isOn(io) {
+	// 	atcControls.Control[3].Isdisabled = false
+	// } else {
+	// 	atcControls.Control[3].Isdisabled = true
+	// }
 
-	if UnClampedLS.isOn(io) {
-		atcControls.Control[3].Isdisabled = false
-	} else {
-		atcControls.Control[3].Isdisabled = true
-	}
+	// if UnclampPin.isOn(io) && UnClampedLS.isOn(io) {
+	// 	atcControls.Control[4].Isdisabled = false
+	// 	atcControls.Control[5].Isdisabled = false
+	// } else {
+	// 	atcControls.Control[4].Isdisabled = true
+	// 	atcControls.Control[5].Isdisabled = true
+	// }
 
-	if UnclampPin.isOn(io) && UnClampedLS.isOn(io) {
-		atcControls.Control[4].Isdisabled = false
-		atcControls.Control[5].Isdisabled = false
-	} else {
-		atcControls.Control[4].Isdisabled = true
-		atcControls.Control[5].Isdisabled = true
-	}
+	// if OrientPin.isOn(io) && OrientPinRetractedLS.isOn(io) {
+	// 	atcControls.Control[10].Isdisabled = false
+	// 	atcControls.Control[11].Isdisabled = false
+	// } else {
+	// 	atcControls.Control[10].Isdisabled = true
+	// 	atcControls.Control[11].Isdisabled = true
+	// }
 
-	if OrientPin.isOn(io) && OrientPinRetractedLS.isOn(io) {
-		atcControls.Control[10].Isdisabled = false
-		atcControls.Control[11].Isdisabled = false
-	} else {
-		atcControls.Control[10].Isdisabled = true
-		atcControls.Control[11].Isdisabled = true
-	}
+	// if PositionIsValid(io) && !OrientPinInsertedLS.isOn(io) {
+	// 	atcControls.Control[9].Isdisabled = false
+	// } else {
+	// 	atcControls.Control[9].Isdisabled = true
+	// }
 
-	if PositionIsValid(io) && !OrientPinInsertedLS.isOn(io) {
-		atcControls.Control[9].Isdisabled = false
-	} else {
-		atcControls.Control[9].Isdisabled = true
-	}
+	// if !OrientPinRetractedLS.isOn(io) {
+	// 	atcControls.Control[8].Isdisabled = false
+	// } else {
+	// 	atcControls.Control[8].Isdisabled = true
+	// }
 
-	if !OrientPinRetractedLS.isOn(io) {
-		atcControls.Control[8].Isdisabled = false
-	} else {
-		atcControls.Control[8].Isdisabled = true
-	}
+	// if SpindleToolUnClampLS.isOn(io) {
+	// 	atcControls.Control[14].Isdisabled = true
+	// } else {
+	// 	atcControls.Control[14].Isdisabled = false
+	// }
 
-	if SpindleToolUnClampLS.isOn(io) {
-		atcControls.Control[14].Isdisabled = true
-	} else {
-		atcControls.Control[14].Isdisabled = false
-	}
-
-	if SpindleToolClampLS.isOn(io) {
-		atcControls.Control[15].Isdisabled = true
-	} else {
-		atcControls.Control[15].Isdisabled = false
-	}
+	// if SpindleToolClampLS.isOn(io) {
+	// 	atcControls.Control[15].Isdisabled = true
+	// } else {
+	// 	atcControls.Control[15].Isdisabled = false
+	// }
 
 	atcControlsJSON, err := json.Marshal(atcControls)
 	if err != nil {
@@ -201,7 +208,7 @@ func Manual(d *device) stateFn {
 		ManLoopCount = 0
 	}
 	ManLoopCount++
-	
+
 	select {
 	case cmd := <-d.manCommands:
 		// return cmd
@@ -255,6 +262,10 @@ func Manual(d *device) stateFn {
 		case "ToolClamp":
 			go sendLog("ToolClamp", "Manual")
 			return ToolClamp
+		case "ZClamp":
+			go sendLog("ZClamp", "Manual")
+			return ZAxisLock
+
 		default:
 			return Manual
 		}
@@ -475,7 +486,7 @@ func Advance(d *device) stateFn {
 		// 	return Manual
 		// }
 
-		if !AdvanceSlow.isOn(io) && !AdvanceSlowLS.isOn(io) {
+		if !AdvanceSlow.isOn(io) && !AdvancedLS.isOn(io) {
 			log.Println("Turning On Advance")
 			go sendLog("Turning On Advance", CurrentState)
 			err := d.writeIO(AdvanceSlow, ON)
@@ -484,7 +495,7 @@ func Advance(d *device) stateFn {
 			}
 			return Advance
 		}
-		if AdvanceSlowLS.isOn(io) {
+		if AdvancedLS.isOn(io) {
 			log.Println("Turning On Advance")
 			go sendLog("Turning On Advance", CurrentState)
 			err := d.writeIO(AdvanceSlow, OFF)
@@ -526,7 +537,7 @@ func Retract(d *device) stateFn {
 		// 	return Manual
 		// }
 
-		if !RetractSlow.isOn(io) && !RetractSlowLS.isOn(io) {
+		if !RetractSlow.isOn(io) && !RetractedLS.isOn(io) {
 			log.Println("Turning On Retract")
 			go sendLog("Turning On Retract", CurrentState)
 			err := d.writeIO(RetractSlow, ON)
@@ -535,7 +546,7 @@ func Retract(d *device) stateFn {
 			}
 			return Retract
 		}
-		if RetractSlowLS.isOn(io) {
+		if RetractedLS.isOn(io) {
 			log.Println("Turning On Retract")
 			go sendLog("Turning On Retract", CurrentState)
 			err := d.writeIO(RetractSlow, OFF)
@@ -939,6 +950,46 @@ func ToolClamp(d *device) stateFn {
 		// Clamping
 		if !SpindleToolUnClamp.isOn(io) && !SpindleToolClampLS.isOn(io) {
 			log.Println("Tool Clamping")
+		}
+	}
+
+	return ToolClamp
+}
+
+func ZAxisLock(d *device) stateFn {
+	CurrentState := "ToolClamp"
+	log.Println(CurrentState)
+
+	select {
+	case nextState := <-d.manCommands:
+		log.Println("got a interput cmd:", nextState)
+		if nextState != CurrentState {
+			d.manCommands <- nextState
+			return Manual
+		}
+	case <-time.After(time.Millisecond * 1):
+		io, err := d.readIO()
+		if err != nil {
+			log.Println(err)
+		}
+		// Turn Off
+		if ZAxisClamp.isOn(io) {
+			log.Println("Turning Off ZAxisClamp")
+			go sendLog("Turning Off ZAxisClamp", CurrentState)
+			err := d.writeIO(ZAxisClamp, OFF)
+			if err != nil {
+				log.Println(err)
+			}
+			return Manual
+		}
+		if !ZAxisClamp.isOn(io) {
+			log.Println("Turning On ZAxisClamp")
+			go sendLog("Turning On ZAxisClamp", CurrentState)
+			err := d.writeIO(ZAxisClamp, ON)
+			if err != nil {
+				log.Println(err)
+			}
+			return Manual
 		}
 	}
 

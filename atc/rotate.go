@@ -30,12 +30,12 @@ const (
 	RotateReverseRapidLS     input = 0x01 << 3
 	AdvancedLS               input = 0x01 << 4
 	RetractedLS              input = 0x01 << 5
-	AdvanceSlowLS            input = 0x01 << 6
-	RetractSlowLS            input = 0x01 << 7
+	AdvanceSlowLS            input = 0x01 << 7
+	RetractSlowLS            input = 0x01 << 6
 	InLS                     input = 0x01 << 8
 	OutLS                    input = 0x01 << 9
-	SpindleToolUnClampLS     input = 0x01 << 10
-	SpindleToolClampLS       input = 0x01 << 11
+	SpindleToolUnClampLS     input = 0x01 << 11
+	SpindleToolClampLS       input = 0x01 << 10
 	SpindleGearLowLS         input = 0x01 << 12
 	SpindleGearHighLS        input = 0x01 << 13
 	UnClampedLS              input = 0x01 << 14
@@ -62,7 +62,7 @@ var (
 )
 
 const (
-	OrientPin                  output = 0x01 << 23
+	OrientPin                  output = 0x01 << 0
 	CarouselRotateForwardRapid output = 0x01 << 1
 	CarouselRotateReverseRapid output = 0x01 << 2
 	CarouselRotateForwardSlow  output = 0x01 << 3
@@ -75,6 +75,7 @@ const (
 	Out                        output = 0x01 << 10
 	UnclampPin                 output = 0x01 << 11
 	SpindleToolUnClamp         output = 0x01 << 12
+	ZAxisClamp                 output = 0x01 << 13
 	SpindleGearLow             output = 0x01 << 14
 	SpindleGearHigh            output = 0x01 << 15
 )
@@ -89,8 +90,8 @@ type ioStatus struct {
 		OrientPinInsertedLS      bool `json:"Orient Pin Inserted LS"`
 		RotateForwardRapidLS     bool `json:"Rotate Forward Rapid LS"`
 		RotateReverseRapidLS     bool `json:"Rotate Reverse Rapid LS"`
-		AdvancedLS               bool `json:"Advance Rapid LS"`
-		RetractedLS              bool `json:"Retract Rapid LS"`
+		AdvancedLS               bool `json:"Advanced LS"`
+		RetractedLS              bool `json:"Retracted LS"`
 		AdvanceSlowLS            bool `json:"Advance Slow LS"`
 		RetractSlowLS            bool `json:"Retract Slow LS"`
 		InLS                     bool `json:"In LS"`
@@ -125,6 +126,7 @@ type ioStatus struct {
 		SpindleToolClamp           bool `json:"Spindle Tool Clamp"`
 		SpindleGearLow             bool `json:"Spindle Gear Low"`
 		SpindleGearHigh            bool `json:"Spindle Gear High"`
+		ZAxisClamp                 bool `json:"ZAxis Clamp"`
 	} `json:"outputs"`
 }
 
@@ -265,6 +267,7 @@ func main() {
 				ioJson.Outputs.RetractRapid = RetractRapid.isOn(io)
 				ioJson.Outputs.AdvanceSlow = AdvanceSlow.isOn(io)
 				ioJson.Outputs.RetractSlow = RetractSlow.isOn(io)
+				ioJson.Outputs.ZAxisClamp = ZAxisClamp.isOn(io)
 				ioJson.Outputs.In = In.isOn(io)
 				ioJson.Outputs.Out = Out.isOn(io)
 				ioJson.Outputs.UnclampPin = UnclampPin.isOn(io)
