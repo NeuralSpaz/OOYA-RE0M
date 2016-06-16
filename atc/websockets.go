@@ -20,7 +20,12 @@ func handleIO(w http.ResponseWriter, r *http.Request) {
 var ioConnections map[*websocket.Conn]bool
 var manConnections map[*websocket.Conn]bool
 var loggerConnections map[*websocket.Conn]bool
-var manCommands chan string
+var Commands chan Command
+
+type Command struct {
+	Cmd       string `json:"cmd"`
+	Parameter string `json:"parm"`
+}
 
 type wsLoggerMessage struct {
 	Msg     string `json:"msg"`
@@ -46,7 +51,7 @@ func sendMan(msg []byte) {
 }
 
 func sendLog(msg string, context string) {
-		json, err := json.Marshal(wsLoggerMessage{Msg:msg, Context:context})
+	json, err := json.Marshal(wsLoggerMessage{Msg: msg, Context: context})
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -111,7 +116,9 @@ func ManualWebSocketsHandler(w http.ResponseWriter, r *http.Request) {
 			conn.Close()
 			return
 		}
-		mesa.manCommands <- string(msg)
+		var command Command
+		json.Unmarshal(msg, command)
+		Commands <- command
 	}
 }
 

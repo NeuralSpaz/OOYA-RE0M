@@ -139,11 +139,11 @@ var ErrFailedRead = errors.New("Failed io Read")
 
 type device struct {
 	sync.Mutex
-	mode        string
-	name        string
-	version     string
-	port        *serial.Port
-	manCommands chan string
+	lastState stateFn
+	mode      string
+	name      string
+	version   string
+	port      *serial.Port
 }
 
 type IO struct {

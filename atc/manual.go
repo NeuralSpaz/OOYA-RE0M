@@ -210,10 +210,10 @@ func Manual(d *device) stateFn {
 	ManLoopCount++
 
 	select {
-	case cmd := <-d.manCommands:
+	case cmd := <-Commands:
 		// return cmd
 		fmt.Println(cmd)
-		switch cmd {
+		switch cmd.Cmd {
 		case "Manual":
 			go sendLog("Manual", "Manual")
 			return Manual
@@ -265,7 +265,10 @@ func Manual(d *device) stateFn {
 		case "ZClamp":
 			go sendLog("ZClamp", "Manual")
 			return ZAxisLock
-
+		case "Auto":
+			go sendLog("Auto("+cmd.Parameter+")", "Manual")
+			Commands <- cmd
+			return Auto
 		default:
 			return Manual
 		}
@@ -279,10 +282,10 @@ func Unclamp(d *device) stateFn {
 	log.Println(CurrentState)
 
 	select {
-	case nextState := <-d.manCommands:
+	case nextState := <-Commands:
 		log.Println("got a interput cmd:", nextState)
-		if nextState != CurrentState {
-			d.manCommands <- nextState
+		if nextState.Cmd != CurrentState {
+			Commands <- nextState
 			return Manual
 		}
 	case <-time.After(time.Millisecond * 1):
@@ -316,10 +319,10 @@ func Clamp(d *device) stateFn {
 	log.Println(CurrentState)
 
 	select {
-	case nextState := <-d.manCommands:
+	case nextState := <-Commands:
 		log.Println("got a interrupt cmd:", nextState)
-		if nextState != CurrentState {
-			d.manCommands <- nextState
+		if nextState.Cmd != CurrentState {
+			Commands <- nextState
 			return Manual
 		}
 	case <-time.After(time.Millisecond * 1):
@@ -356,7 +359,7 @@ func Up(d *device) stateFn {
 	log.Println(CurrentState)
 
 	select {
-	case nextState := <-d.manCommands:
+	case nextState := <-Commands:
 		log.Println("got a interput cmd:", nextState)
 		log.Println("Turning Off Up")
 		go sendLog("Turning Off Up", CurrentState)
@@ -364,8 +367,8 @@ func Up(d *device) stateFn {
 		if err != nil {
 			log.Println(err)
 		}
-		if nextState != CurrentState {
-			d.manCommands <- nextState
+		if nextState.Cmd != CurrentState {
+			Commands <- nextState
 			return Manual
 		}
 		return Manual
@@ -409,7 +412,7 @@ func Down(d *device) stateFn {
 	log.Println(CurrentState)
 
 	select {
-	case nextState := <-d.manCommands:
+	case nextState := <-Commands:
 		log.Println("got a interput cmd:", nextState)
 		log.Println("Turning Off Down")
 		go sendLog("Turning Off Down", CurrentState)
@@ -417,8 +420,8 @@ func Down(d *device) stateFn {
 		if err != nil {
 			log.Println(err)
 		}
-		if nextState != CurrentState {
-			d.manCommands <- nextState
+		if nextState.Cmd != CurrentState {
+			Commands <- nextState
 			return Manual
 		}
 		return Manual
@@ -462,7 +465,7 @@ func Advance(d *device) stateFn {
 	log.Println(CurrentState)
 
 	select {
-	case nextState := <-d.manCommands:
+	case nextState := <-Commands:
 		log.Println("got a interput cmd:", nextState)
 		log.Println("Turning Off Advance")
 		go sendLog("Turning Off Advance", CurrentState)
@@ -470,8 +473,8 @@ func Advance(d *device) stateFn {
 		if err != nil {
 			log.Println(err)
 		}
-		if nextState != CurrentState {
-			d.manCommands <- nextState
+		if nextState.Cmd != CurrentState {
+			Commands <- nextState
 			return Manual
 		}
 		return Manual
@@ -513,7 +516,7 @@ func Retract(d *device) stateFn {
 	log.Println(CurrentState)
 
 	select {
-	case nextState := <-d.manCommands:
+	case nextState := <-Commands:
 		log.Println("got a interput cmd:", nextState)
 		log.Println("Turning Off Retract")
 		go sendLog("Turning Off Retract", CurrentState)
@@ -521,8 +524,8 @@ func Retract(d *device) stateFn {
 		if err != nil {
 			log.Println(err)
 		}
-		if nextState != CurrentState {
-			d.manCommands <- nextState
+		if nextState.Cmd != CurrentState {
+			Commands <- nextState
 			return Manual
 		}
 		return Manual
@@ -564,10 +567,10 @@ func OrientPinRetrat(d *device) stateFn {
 	log.Println(CurrentState)
 
 	select {
-	case nextState := <-d.manCommands:
+	case nextState := <-Commands:
 		log.Println("got a interput cmd:", nextState)
-		if nextState != CurrentState {
-			d.manCommands <- nextState
+		if nextState.Cmd != CurrentState {
+			Commands <- nextState
 			return Manual
 		}
 	case <-time.After(time.Millisecond * 1):
@@ -603,10 +606,10 @@ func OrientPinInsert(d *device) stateFn {
 	log.Println(CurrentState)
 
 	select {
-	case nextState := <-d.manCommands:
+	case nextState := <-Commands:
 		log.Println("got a interput cmd:", nextState)
-		if nextState != CurrentState {
-			d.manCommands <- nextState
+		if nextState.Cmd != CurrentState {
+			Commands <- nextState
 			return Manual
 		}
 	case <-time.After(time.Millisecond * 1):
@@ -642,7 +645,7 @@ func RotateCW(d *device) stateFn {
 	log.Println(CurrentState)
 
 	select {
-	case nextState := <-d.manCommands:
+	case nextState := <-Commands:
 		log.Println("got a interput cmd:", nextState)
 		log.Println("Turning Off CarouselRotateForwardSlow")
 		go sendLog("Turning Off CarouselRotateForwardSlow", CurrentState)
@@ -650,8 +653,8 @@ func RotateCW(d *device) stateFn {
 		if err != nil {
 			log.Println(err)
 		}
-		if nextState != CurrentState {
-			d.manCommands <- nextState
+		if nextState.Cmd != CurrentState {
+			Commands <- nextState
 			return Manual
 		}
 		return Manual
@@ -683,7 +686,7 @@ func RotateCCW(d *device) stateFn {
 	log.Println(CurrentState)
 
 	select {
-	case nextState := <-d.manCommands:
+	case nextState := <-Commands:
 		log.Println("got a interput cmd:", nextState)
 		log.Println("Turning Off CarouselRotateReverseSlow")
 		go sendLog("Turning Off CarouselRotateReverseSlow", CurrentState)
@@ -691,8 +694,8 @@ func RotateCCW(d *device) stateFn {
 		if err != nil {
 			log.Println(err)
 		}
-		if nextState != CurrentState {
-			d.manCommands <- nextState
+		if nextState.Cmd != CurrentState {
+			Commands <- nextState
 
 			return Manual
 		}
@@ -727,9 +730,9 @@ func IndexCW(d *device) stateFn {
 	log.Println(CurrentState)
 
 	select {
-	case nextState := <-d.manCommands:
+	case nextState := <-Commands:
 		log.Println("got a interput cmd:", nextState)
-		if nextState == "Indexed" {
+		if nextState.Cmd == "Indexed" {
 			err := d.writeIO(CarouselRotateForwardSlow, OFF)
 			if err != nil {
 				log.Println(err)
@@ -740,8 +743,8 @@ func IndexCW(d *device) stateFn {
 			}
 			return Manual
 		}
-		if nextState != CurrentState {
-			d.manCommands <- nextState
+		if nextState.Cmd != CurrentState {
+			Commands <- nextState
 			err := d.writeIO(CarouselRotateForwardSlow, OFF)
 			if err != nil {
 				log.Println(err)
@@ -786,7 +789,7 @@ func IndexCW(d *device) stateFn {
 							// if err != nil {
 							// 	log.Println(err)
 							// }
-							d.manCommands <- "Indexed"
+							Commands <- Command{"Indexed", ""}
 							return
 						}
 					}
@@ -804,9 +807,9 @@ func IndexCCW(d *device) stateFn {
 	log.Println(CurrentState)
 
 	select {
-	case nextState := <-d.manCommands:
+	case nextState := <-Commands:
 		log.Println("got a interput cmd:", nextState)
-		if nextState == "Indexed" {
+		if nextState.Cmd == "Indexed" {
 			err := d.writeIO(CarouselRotateReverseSlow, OFF)
 			if err != nil {
 				log.Println(err)
@@ -817,8 +820,8 @@ func IndexCCW(d *device) stateFn {
 			}
 			return Manual
 		}
-		if nextState != CurrentState {
-			d.manCommands <- nextState
+		if nextState.Cmd != CurrentState {
+			Commands <- nextState
 			err := d.writeIO(CarouselRotateReverseSlow, OFF)
 			if err != nil {
 				log.Println(err)
@@ -863,7 +866,7 @@ func IndexCCW(d *device) stateFn {
 							// if err != nil {
 							// 	log.Println(err)
 							// }
-							d.manCommands <- "Indexed"
+							Commands <- Command{"Indexed", ""}
 							return
 						}
 					}
@@ -881,10 +884,10 @@ func ToolUnclamp(d *device) stateFn {
 	log.Println(CurrentState)
 
 	select {
-	case nextState := <-d.manCommands:
+	case nextState := <-Commands:
 		log.Println("got a interput cmd:", nextState)
-		if nextState != CurrentState {
-			d.manCommands <- nextState
+		if nextState.Cmd != CurrentState {
+			Commands <- nextState
 			return Manual
 		}
 	case <-time.After(time.Millisecond * 1):
@@ -921,10 +924,10 @@ func ToolClamp(d *device) stateFn {
 	log.Println(CurrentState)
 
 	select {
-	case nextState := <-d.manCommands:
+	case nextState := <-Commands:
 		log.Println("got a interput cmd:", nextState)
-		if nextState != CurrentState {
-			d.manCommands <- nextState
+		if nextState.Cmd != CurrentState {
+			Commands <- nextState
 			return Manual
 		}
 	case <-time.After(time.Millisecond * 1):
@@ -961,10 +964,10 @@ func ZAxisLock(d *device) stateFn {
 	log.Println(CurrentState)
 
 	select {
-	case nextState := <-d.manCommands:
+	case nextState := <-Commands:
 		log.Println("got a interput cmd:", nextState)
-		if nextState != CurrentState {
-			d.manCommands <- nextState
+		if nextState.Cmd != CurrentState {
+			Commands <- nextState
 			return Manual
 		}
 	case <-time.After(time.Millisecond * 1):

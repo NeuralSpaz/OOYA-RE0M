@@ -62,15 +62,15 @@ func Safe(d *device) stateFn {
 		select {
 		case <-time.After(time.Millisecond * 1):
 			nextState <- Safe
-		case cmd := <-d.manCommands:
-			fmt.Println("Recived Command in Safe:", cmd)
+		case cmd := <-Commands:
+			fmt.Println("Recived Command in Safe:", cmd.Cmd)
 			// atcControls.Control[0].Isdisabled = false
 			// ManControls, err := json.Marshal(atcControls)
 			// if err != nil {
 			// 	fmt.Println(err)
 			// }
 			// sendMan(ManControls)
-			if cmd == "Manual" {
+			if cmd.Cmd == "Manual" {
 				// for key, _ := range atcControls.Control {
 				// 	atcControls.Control[key].Isdisabled = false
 				// }

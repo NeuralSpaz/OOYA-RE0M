@@ -15,9 +15,9 @@ func newDevice() device {
 	}
 
 	mesa := device{
-		name:        "7i64",
-		port:        s,
-		manCommands: make(chan string, 1),
+		name: "7i64",
+		port: s,
+		// manCommands: make(chan string, 1),
 	}
 
 	_, err = s.Write([]byte{0x66, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08})
